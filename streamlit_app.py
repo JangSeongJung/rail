@@ -56,36 +56,40 @@ with st.form("input_form"):
 
     with top_right:
         st.markdown("**2. 기본 제원**")
-        m_person = st.number_input("사람(운전자) 무게 [kg]", value=150.0, step=1.0)
-        m_trolley = st.number_input("트롤리(동력체) 무게 [kg]", value=30.0, step=1.0)
-        L = st.number_input("거리(줄 길이) [m]", value=1.5, step=0.1, format="%.2f")
-        sc1, sc2 = st.columns([2, 1])
+        mc1, mc2, mc3 = st.columns(3)
+        m_person = mc1.number_input("사람무게 [kg]", value=150.0, step=1.0)
+        m_trolley = mc2.number_input("트롤리무게 [kg]", value=30.0, step=1.0)
+        L = mc3.number_input("거리(줄길이) [m]", value=1.5, step=0.1, format="%.2f")
+        sc1, sc2, sc3, sc4 = st.columns([2, 1, 2, 1])
         speed = sc1.number_input("최고속도", value=2.0, step=0.1, format="%.2f")
         speed_unit = sc2.selectbox("단위", ["m/s", "km/h"], key="speed_unit")
-        pc1, pc2 = st.columns([2, 1])
-        power = pc1.number_input("추진출력", value=10.0, step=1.0)
-        power_unit = pc2.selectbox("단위", ["kw", "w", "ps", "hp"], key="power_unit")
+        power = sc3.number_input("추진출력", value=10.0, step=1.0)
+        power_unit = sc4.selectbox("단위", ["kw", "w", "ps", "hp"], key="power_unit")
 
     # ── 아랫줄 : 3(좌) / 4(우) ──
     bot_left, bot_right = st.columns(2, gap="large")
 
     with bot_left:
         st.markdown("**3. MGT 시작 번호**")
-        start_node = st.number_input("시작 노드번호", value=1001, step=1)
-        start_elem = st.number_input("시작 요소번호", value=5001, step=1)
-        imat = st.number_input("재질번호 iMAT", value=1, step=1)
-        ipro = st.number_input("단면번호 iPRO", value=1, step=1)
+        nc1, nc2 = st.columns(2)
+        start_node = nc1.number_input("시작 노드번호", value=1001, step=1)
+        start_elem = nc2.number_input("시작 요소번호", value=5001, step=1)
+        nc3, nc4 = st.columns(2)
+        imat = nc3.number_input("재질번호 iMAT", value=1, step=1)
+        ipro = nc4.number_input("단면번호 iPRO", value=1, step=1)
 
     with bot_right:
         st.markdown("**4. 고급 설정 (기본값 사용 가능)**")
-        bc1, bc2 = st.columns([2, 1])
+        bc1, bc2, bc3 = st.columns([2, 1, 2])
         base_speed = bc1.number_input("기저속도", value=0.6, step=0.1, format="%.2f")
         base_speed_unit = bc2.selectbox("단위", ["m/s", "km/h"], key="base_unit")
-        eff = st.number_input("구동효율 η", value=0.85, step=0.01, format="%.2f")
-        brake = st.number_input("비상감속 [m/s²]", value=4.0, step=0.1, format="%.2f")
-        accel_limit = st.number_input("가속 상한 [m/s²]", value=2.0, step=0.1, format="%.2f")
-        damping = st.number_input("진자 감쇠비 ζ", value=0.03, step=0.01, format="%.2f")
-        seg = st.number_input("요소분할 [m]", value=0.3, step=0.05, format="%.2f")
+        eff = bc3.number_input("구동효율 η", value=0.85, step=0.01, format="%.2f")
+        ac1, ac2 = st.columns(2)
+        brake = ac1.number_input("비상감속 [m/s²]", value=4.0, step=0.1, format="%.2f")
+        accel_limit = ac2.number_input("가속 상한 [m/s²]", value=2.0, step=0.1, format="%.2f")
+        dc1, dc2 = st.columns(2)
+        damping = dc1.number_input("진자 감쇠비 ζ", value=0.03, step=0.01, format="%.2f")
+        seg = dc2.number_input("요소분할 [m]", value=0.3, step=0.05, format="%.2f")
 
     submitted = st.form_submit_button("리포트 + MGT 생성", type="primary", use_container_width=True)
 
