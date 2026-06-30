@@ -50,11 +50,11 @@ with st.form("input_form"):
     # ── 윗줄 : 1(좌) / 2(우) ──
     top_left, top_right = st.columns(2, gap="large")
 
-    with top_left:
+    with top_left.container(border=True):
         st.markdown("**1. DXF 경로 파일**")
         dxf_file = st.file_uploader("DXF 파일", type=["dxf"], label_visibility="collapsed")
 
-    with top_right:
+    with top_right.container(border=True):
         st.markdown("**2. 기본 제원**")
         mc1, mc2, mc3 = st.columns(3)
         m_person = mc1.number_input("사람무게 [kg]", value=150.0, step=1.0)
@@ -69,7 +69,7 @@ with st.form("input_form"):
     # ── 아랫줄 : 3(좌) / 4(우) ──
     bot_left, bot_right = st.columns(2, gap="large")
 
-    with bot_left:
+    with bot_left.container(border=True):
         st.markdown("**3. MGT 시작 번호**")
         nc1, nc2 = st.columns(2)
         start_node = nc1.number_input("시작 노드번호", value=1001, step=1)
@@ -78,7 +78,7 @@ with st.form("input_form"):
         imat = nc3.number_input("재질번호 iMAT", value=1, step=1)
         ipro = nc4.number_input("단면번호 iPRO", value=1, step=1)
 
-    with bot_right:
+    with bot_right.container(border=True):
         st.markdown("**4. 고급 설정 (기본값 사용 가능)**")
         bc1, bc2, bc3 = st.columns([2, 1, 2])
         base_speed = bc1.number_input("기저속도", value=0.6, step=0.1, format="%.2f")
