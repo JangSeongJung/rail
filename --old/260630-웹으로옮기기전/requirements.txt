@@ -1,0 +1,3 @@
+numpy>=1.24
+ezdxf>=1.1
+matplotlib>=3.7
