@@ -43,30 +43,32 @@ st.caption(
 # ─────────────────────────── 입력 폼 ───────────────────────────
 # 폼으로 묶으면 '생성' 버튼을 누를 때만 한 번에 실행된다(중간 입력마다 재실행 X).
 with st.form("input_form"):
-    dxf_file = st.file_uploader("1. DXF 경로 파일", type=["dxf"])
+    # 좌: 1.DXF + 2.기본제원(세로) / 우: 3.MGT 시작번호(세로)
+    left, right = st.columns([3, 2], gap="large")
 
-    st.markdown("**2. 기본 제원**")
-    c1, c2, c3 = st.columns(3)
-    m_person = c1.number_input("사람(운전자) 무게 [kg]", value=150.0, step=1.0)
-    m_trolley = c2.number_input("트롤리(동력체) 무게 [kg]", value=30.0, step=1.0)
-    L = c3.number_input("거리(줄 길이) [m]", value=1.5, step=0.1, format="%.2f")
+    with left:
+        st.markdown("**1. DXF 경로 파일**")
+        dxf_file = st.file_uploader("DXF 파일", type=["dxf"], label_visibility="collapsed")
 
-    c4, c5 = st.columns(2)
-    with c4:
+        st.markdown("**2. 기본 제원**")
+        m_person = st.number_input("사람(운전자) 무게 [kg]", value=150.0, step=1.0)
+        m_trolley = st.number_input("트롤리(동력체) 무게 [kg]", value=30.0, step=1.0)
+        L = st.number_input("거리(줄 길이) [m]", value=1.5, step=0.1, format="%.2f")
+
         sc1, sc2 = st.columns([2, 1])
         speed = sc1.number_input("최고속도", value=2.0, step=0.1, format="%.2f")
         speed_unit = sc2.selectbox("단위", ["m/s", "km/h"], key="speed_unit")
-    with c5:
+
         pc1, pc2 = st.columns([2, 1])
         power = pc1.number_input("추진출력", value=10.0, step=1.0)
         power_unit = pc2.selectbox("단위", ["kw", "w", "ps", "hp"], key="power_unit")
 
-    st.markdown("**3. MGT 시작 번호**")
-    m1, m2, m3, m4 = st.columns(4)
-    start_node = m1.number_input("시작 노드번호", value=1001, step=1)
-    start_elem = m2.number_input("시작 요소번호", value=5001, step=1)
-    imat = m3.number_input("재질번호 iMAT", value=1, step=1)
-    ipro = m4.number_input("단면번호 iPRO", value=1, step=1)
+    with right:
+        st.markdown("**3. MGT 시작 번호**")
+        start_node = st.number_input("시작 노드번호", value=1001, step=1)
+        start_elem = st.number_input("시작 요소번호", value=5001, step=1)
+        imat = st.number_input("재질번호 iMAT", value=1, step=1)
+        ipro = st.number_input("단면번호 iPRO", value=1, step=1)
 
     with st.expander("4. 고급 설정 (기본값 사용 가능)"):
         a1, a2, a3 = st.columns(3)
