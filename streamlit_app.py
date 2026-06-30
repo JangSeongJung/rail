@@ -181,4 +181,6 @@ if res:
 
     st.markdown("---")
     st.subheader("리포트 미리보기")
+    st.info("📄 PDF로 저장하려면 아래 미리보기 왼쪽 위의 **'📄 보고서 PDF 저장'** 버튼을 누르세요. "
+            "(요약 + 표가 A4 세로 PDF 한 파일로 합쳐져 바로 다운로드됩니다.)")
     st.components.v1.html(res["html"], height=900, scrolling=True)
