@@ -36,7 +36,7 @@ st.set_page_config(page_title="레일 이동하중 검토", page_icon="🛤️",
 st.title("🛤️ 레일 이동하중 검토 (동·정역학)")
 st.caption("DXF 경로를 올리고 제원을 입력하면 ACC/CON/DEC 3케이스 하중 리포트와 Midas Gen MGT를 생성합니다.")
 
-col1, col2, col3, col4 = st.columns([1.25, 1, 1, 1.1], gap="medium")
+col1, col2, col3, col4 = st.columns([1.1, 1.1, 0.85, 1.35], gap="medium")
 
 # ── col1 : DXF · 해석실행 버튼 · 결과 ──
 with col1:
@@ -52,10 +52,12 @@ with col2:
     m_person = st.number_input("사람(운전자) 무게 [kg]", value=150.0, step=1.0)
     m_trolley = st.number_input("트롤리(동력체) 무게 [kg]", value=30.0, step=1.0)
     L = st.number_input("거리(줄 길이) [m]", value=1.5, step=0.1, format="%.2f")
-    speed = st.number_input("최고속도", value=2.0, step=0.1, format="%.2f")
-    speed_unit = st.selectbox("최고속도 단위", ["m/s", "km/h"], key="speed_unit")
-    power = st.number_input("추진출력", value=10.0, step=1.0)
-    power_unit = st.selectbox("추진출력 단위", ["kw", "w", "ps", "hp"], key="power_unit")
+    s1, s2 = st.columns([3, 2])
+    speed = s1.number_input("최고속도", value=2.0, step=0.1, format="%.2f")
+    speed_unit = s2.selectbox("단위", ["m/s", "km/h"], key="speed_unit")
+    p1, p2 = st.columns([3, 2])
+    power = p1.number_input("추진출력", value=10.0, step=1.0)
+    power_unit = p2.selectbox("단위", ["kw", "w", "ps", "hp"], key="power_unit")
 
 # ── col3 : 3. MGT 시작 번호 (세로로 좁게) ──
 with col3:
@@ -68,13 +70,17 @@ with col3:
 # ── col4 : 4. 고급 설정 (세로로 좁게) ──
 with col4:
     st.markdown("**4. 고급 설정 (기본값 사용 가능)**")
-    base_speed = st.number_input("기저속도", value=0.6, step=0.1, format="%.2f")
-    base_speed_unit = st.selectbox("기저속도 단위", ["m/s", "km/h"], key="base_unit")
-    eff = st.number_input("구동효율 η", value=0.85, step=0.01, format="%.2f")
-    brake = st.number_input("비상감속 [m/s²]", value=4.0, step=0.1, format="%.2f")
-    accel_limit = st.number_input("가속 상한 [m/s²]", value=2.0, step=0.1, format="%.2f")
-    damping = st.number_input("진자 감쇠비 ζ", value=0.03, step=0.01, format="%.2f")
-    seg = st.number_input("요소분할 [m]", value=0.3, step=0.05, format="%.2f")
+    g = st.columns([3, 2])
+    base_speed = g[0].number_input("기저속도", value=0.6, step=0.1, format="%.2f")
+    base_speed_unit = g[1].selectbox("단위", ["m/s", "km/h"], key="base_unit")
+    g = st.columns(2)
+    eff = g[0].number_input("구동효율 η", value=0.85, step=0.01, format="%.2f")
+    brake = g[1].number_input("비상감속 [m/s²]", value=4.0, step=0.1, format="%.2f")
+    g = st.columns(2)
+    accel_limit = g[0].number_input("가속 상한 [m/s²]", value=2.0, step=0.1, format="%.2f")
+    damping = g[1].number_input("진자 감쇠비 ζ", value=0.03, step=0.01, format="%.2f")
+    g = st.columns(2)
+    seg = g[0].number_input("요소분할 [m]", value=0.3, step=0.05, format="%.2f")
 
 # ── 결과 미리보기 자리 (빨간 네모 아래, 전체 폭) ──
 preview_slot = st.container()
