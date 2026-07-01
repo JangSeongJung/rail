@@ -14,6 +14,7 @@ PDF는 rail_analyzer/pdf_report.py 로 새로 생성한다.
 """
 from __future__ import annotations
 
+import base64
 import os
 import tempfile
 import traceback
@@ -119,9 +120,8 @@ if run:
         cases = run_all_cases(geom, pen, device, a_brake=brake,
                               accel_limit=accel_limit, progress=on_step)
 
-        # HTML(미리보기용) · MGT · PDF 생성
-        html = build_report(geom, cases, pen, device, int(start_node), brake, accel_limit)
-
+        # HTML(미리보기) 안에 표 PDF를 심어, 미리보기의 'PDF로 저장' 버튼이
+        # [화면 이미지 + 표 PDF]를 한 개로 합쳐 내려받게 한다.
         mgt_path = os.path.join(tempfile.gettempdir(), "rail_3case.mgt")
         case_forces = {c.name: c.node_force for c in cases.values()}
         write_mgt_cases(mgt_path, geom, case_forces,
@@ -136,11 +136,15 @@ if run:
             power_disp=f"{power:.1f} {power_unit}",
             start_node=int(start_node))
         pdf_bytes = build_pdf(geom, cases, pdf_inputs)
+        pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii")
+
+        html = build_report(geom, cases, pen, device, int(start_node),
+                            brake, accel_limit, pdf_b64=pdf_b64)
 
         env = max(np.linalg.norm(c.node_force, axis=1).max() for c in cases.values())
 
         st.session_state["result"] = {
-            "html": html, "mgt": mgt_text, "pdf": pdf_bytes,
+            "html": html, "mgt": mgt_text,
             "n_nodes": geom.n_nodes, "speed_ms": speed_ms, "env": env,
             "stem": os.path.splitext(dxf_file.name)[0],
         }
@@ -163,9 +167,7 @@ if res:
     box.download_button("⬇️ MGT 다운", data=res["mgt"],
                         file_name=f"{res['stem']}_3case.mgt", mime="text/plain",
                         use_container_width=True)
-    box.download_button("⬇️ PDF 다운", data=res["pdf"],
-                        file_name=f"{res['stem']}_report.pdf", mime="application/pdf",
-                        use_container_width=True)
+    box.caption("PDF는 아래 미리보기의 '📄 PDF로 저장' 버튼")
 
     with preview_slot:
         st.markdown("---")
