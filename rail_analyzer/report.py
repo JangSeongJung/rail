@@ -169,8 +169,8 @@ def build_report(geom: PathGeometry, cases: dict[str, CaseResult],
         full_html=False, include_plotlyjs=False, div_id="graph2d",
         config={"responsive": True})
     css = """
-    body{font-family:'Malgun Gothic',sans-serif;margin:24px;color:#222;line-height:1.5}
-    h1{border-bottom:3px solid #2a7fff;padding-bottom:6px}
+    body{font-family:'Malgun Gothic',sans-serif;margin:24px;color:#222;line-height:1.5;background:#ffffff}
+    h1{border-bottom:3px solid #2a7fff;padding-bottom:6px;color:#000000}
     h2{margin-top:28px;color:#2a7fff}
     .spec{background:#f3f7ff;padding:10px 14px;border-radius:8px;font-size:13px}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -193,61 +193,10 @@ def build_report(geom: PathGeometry, cases: dict[str, CaseResult],
     .btn{background:#2a7fff;color:#fff;border:0;border-radius:6px;padding:9px 16px;font-size:14px;cursor:pointer}
     .btn:hover{background:#1769e0}
     """
-    h2c = '<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>'
-    js = """
-<script>
-var A4=1.41421;
-function _dlc(c,name){var a=document.createElement('a');a.href=c.toDataURL('image/jpeg',0.96);a.download=name;a.click();}
-function _page(W){var c=document.createElement('canvas');c.width=W;c.height=Math.round(W*A4);
-  var x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
-  x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);return c;}
-function _img(url){return new Promise(function(r){var im=new Image();im.onload=function(){r(im);};im.src=url;});}
-async function saveJPG(){
-  var btn=document.getElementById('jpgbtn'); btn.textContent='저장 중…'; btn.disabled=true;
-  try{
-    var W=2480, M=70, iw=W-2*M;
-    // 1페이지: 레일형태(3D) + 하중그래프 + 공식/특이사항
-    var u3=await Plotly.toImage('plot3d',{format:'png',width:1100,height:680,scale:3});
-    var ug=await Plotly.toImage('graph2d',{format:'png',width:1100,height:560,scale:3});
-    var im3=await _img(u3), img=await _img(ug);
-    var cf=await html2canvas(document.getElementById('cap-formula'),{scale:3,backgroundColor:'#fff'});
-    var p1=_page(W); var x=p1.getContext('2d');
-    var titleH=92, gap=38;
-    var h3=iw*im3.height/im3.width, hg=iw*img.height/img.width, hf=iw*cf.height/cf.width;
-    var avail=p1.height-2*M-titleH-2*gap;
-    var s=Math.min(1, avail/(h3+hg+hf));
-    x.fillStyle='#16407a'; x.font='bold 50px sans-serif';
-    x.fillText('레일 형태 · 하중 분포 · 사용 공식', M, M+48);
-    var y=M+titleH;
-    function _ctr(w){return M+(iw-w)/2;}
-    x.drawImage(im3,_ctr(iw*s),y,iw*s,h3*s); y+=h3*s+gap;
-    x.drawImage(img,_ctr(iw*s),y,iw*s,hg*s); y+=hg*s+gap;
-    x.drawImage(cf,_ctr(iw*s),y,iw*s,hf*s);
-    _dlc(p1,'보고서_1_요약.jpg');
-    // 2페이지~: 표 (폭 맞춰 크게, A4 높이로 슬라이스)
-    var ce=document.getElementById('cap-table');
-    var tws=ce.querySelectorAll('.tablewrap'); var olds=[];
-    tws.forEach(function(tw){olds.push(tw.style.maxHeight);tw.style.maxHeight='none';});
-    var ct=await html2canvas(ce,{scale:3,backgroundColor:'#fff'});
-    tws.forEach(function(tw,i){tw.style.maxHeight=olds[i];});
-    var sc=iw/ct.width; if(sc>1.7){sc=1.7;}      // 좁은 표는 확대(글자 크게), 과확대 방지
-    var srcPageH=(p1.height-2*M)/sc;
-    var nP=Math.max(1,Math.ceil(ct.height/srcPageH));
-    for(var p=0;p<nP;p++){
-      var pg=_page(W); var xc=pg.getContext('2d');
-      var sy=p*srcPageH, sh=Math.min(srcPageH,ct.height-sy);
-      xc.drawImage(ct,0,sy,ct.width,sh, M,M,ct.width*sc,sh*sc);
-      _dlc(pg,'보고서_표_'+(p+1)+'.jpg');
-    }
-    alert('총 '+(1+nP)+'장 저장됨 (브라우저가 여러 다운로드를 물으면 허용하세요)');
-  }catch(e){alert('이미지 저장 오류: '+e);}
-  btn.textContent='📷 보고서 JPG 저장'; btn.disabled=false;
-}
-</script>"""
+    h2c = ''  # JPG 저장 기능 제거 → html2canvas 미로드
+    js = ""  # JPG 저장 스크립트 제거
     return f"""<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
 <title>{title}</title>{h2c}<style>{css}</style></head><body>
-<div class="toolbar"><button id="jpgbtn" class="btn" onclick="saveJPG()">📷 보고서 JPG 저장</button>
-<span style="font-size:12px;color:#666;margin-left:10px">A4 세로로 저장: 1쪽 그래프+공식, 2쪽~ 결과표(글자 크게, 여러 장). 3D는 그림 우상단 📷 아이콘으로도 따로 저장됩니다.</span></div>
 <h1>{title}</h1>
 <div class="lr">
 <div>
