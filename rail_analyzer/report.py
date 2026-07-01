@@ -155,9 +155,56 @@ def _fig_graph(geom, cases) -> go.Figure:
     return fig
 
 
+_PDF_JS = r"""
+<script>
+function _img(url){return new Promise(function(r){var im=new Image();im.onload=function(){r(im);};im.src=url;});}
+function _page(W){var c=document.createElement('canvas');c.width=W;c.height=Math.round(W*1.41421);
+  var x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
+  x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);return c;}
+function _bytes(b64){var bin=atob(b64);var n=bin.length;var a=new Uint8Array(n);for(var i=0;i<n;i++){a[i]=bin.charCodeAt(i);}return a;}
+async function savePDF(){
+  var btn=document.getElementById('pdfbtn'); var old=btn.textContent;
+  btn.textContent='PDF 만드는 중…'; btn.disabled=true;
+  try{
+    var W=2480, M=70, iw=W-2*M;
+    var u3=await Plotly.toImage('plot3d',{format:'png',width:1100,height:680,scale:3});
+    var ug=await Plotly.toImage('graph2d',{format:'png',width:1100,height:560,scale:3});
+    var im3=await _img(u3), img=await _img(ug);
+    var cf=await html2canvas(document.getElementById('cap-formula'),{scale:3,backgroundColor:'#fff'});
+    var p1=_page(W); var x=p1.getContext('2d');
+    var titleH=92, gap=38;
+    var h3=iw*im3.height/im3.width, hg=iw*img.height/img.width, hf=iw*cf.height/cf.width;
+    var avail=p1.height-2*M-titleH-2*gap;
+    var s=Math.min(1, avail/(h3+hg+hf));
+    x.fillStyle='#16407a'; x.font='bold 50px sans-serif';
+    x.fillText('레일 형태 · 하중 분포 · 사용 공식', M, M+48);
+    var y=M+titleH; function _ctr(w){return M+(iw-w)/2;}
+    x.drawImage(im3,_ctr(iw*s),y,iw*s,h3*s); y+=h3*s+gap;
+    x.drawImage(img,_ctr(iw*s),y,iw*s,hg*s); y+=hg*s+gap;
+    x.drawImage(cf,_ctr(iw*s),y,iw*s,hf*s);
+    var jpgBytes=_bytes(p1.toDataURL('image/jpeg',0.95).split(',')[1]);
+    var out=await PDFLib.PDFDocument.create();
+    var jpg=await out.embedJpg(jpgBytes);
+    var A4W=595.28, A4H=841.89;
+    out.addPage([A4W,A4H]).drawImage(jpg,{x:0,y:0,width:A4W,height:A4H});
+    var src=await PDFLib.PDFDocument.load(_bytes("__PDF_B64__"));
+    var cp=await out.copyPages(src, src.getPageIndices());
+    cp.forEach(function(p){out.addPage(p);});
+    var bytes=await out.save();
+    var blob=new Blob([bytes],{type:'application/pdf'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='레일_이동하중_검토.pdf'; a.click();
+  }catch(e){alert('PDF 저장 오류: '+e);}
+  btn.textContent=old; btn.disabled=false;
+}
+</script>
+"""
+
+
 def build_report(geom: PathGeometry, cases: dict[str, CaseResult],
                  pen: Pendulum, device, start_node: int,
-                 a_brake: float, accel_limit: float, title: str = "레일 이동하중 검토") -> str:
+                 a_brake: float, accel_limit: float, pdf_b64: str = "",
+                 title: str = "레일 이동하중 검토") -> str:
     cases = {c.name: c for c in cases.values()}   # 키 대문자 정규화
     spec = (f"줄길이 L={pen.length} m · 사람 {pen.m_person} kg · 트롤리 {pen.m_trolley} kg · "
             f"감쇠 ζ={pen.damping} · 최고속도 {device.speed} m/s · "
@@ -193,10 +240,21 @@ def build_report(geom: PathGeometry, cases: dict[str, CaseResult],
     .btn{background:#2a7fff;color:#fff;border:0;border-radius:6px;padding:9px 16px;font-size:14px;cursor:pointer}
     .btn:hover{background:#1769e0}
     """
-    h2c = ''  # JPG 저장 기능 제거 → html2canvas 미로드
-    js = ""  # JPG 저장 스크립트 제거
+    if pdf_b64:
+        h2c = ('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>'
+               '<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>')
+        toolbar = ('<div class="toolbar">'
+                   '<button id="pdfbtn" class="btn" onclick="savePDF()">📄 PDF로 저장</button>'
+                   '<span style="font-size:12px;color:#666;margin-left:10px">'
+                   '3D·그래프·공식을 앞장에, 결과표를 뒷장에 붙여 PDF 한 개로 저장합니다.</span></div>')
+        js = _PDF_JS.replace("__PDF_B64__", pdf_b64)
+    else:
+        h2c = ""
+        toolbar = ""
+        js = ""
     return f"""<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
 <title>{title}</title>{h2c}<style>{css}</style></head><body>
+{toolbar}
 <h1>{title}</h1>
 <div class="lr">
 <div>
